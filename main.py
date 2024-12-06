@@ -239,7 +239,6 @@ def select_optimal_line(all_lines, binary_image):
     height, width = binary_image.shape
     lines_features = [analyze_line_features(line, binary_image) for line in all_lines]
 
-    # 归一化特征
     max_length = max(f['length'] for f in lines_features)
     max_centrality = max(f['centrality'] for f in lines_features)
 
@@ -249,7 +248,6 @@ def select_optimal_line(all_lines, binary_image):
         curvature_score = 1 - (features['max_curvature'] / np.pi)  # 曲率越小越好
         centrality_score = 1 - (features['centrality'] / max_centrality)  # 中心度越高越好
 
-        # 综合评分
         total_score = (0.4 * length_score +
                        0.3 * curvature_score +
                        0.3 * centrality_score)
@@ -361,12 +359,10 @@ def create_curve_spectrogram(image, curve_points, window_size=50):
     curve = np.array(curve_points)
     x, y = curve[:, 0], curve[:, 1]
 
-    # 移除重复的x坐标
     unique_indices = np.unique(x, return_index=True)[1]
     x = x[unique_indices]
     y = y[unique_indices]
 
-    # 确保x坐标严格递增
     sort_idx = np.argsort(x)
     x = x[sort_idx]
     y = y[sort_idx]
@@ -397,7 +393,6 @@ def create_curve_spectrogram(image, curve_points, window_size=50):
 def visualize_spectrograms(image, binary_image, curve_points, upper_spec, lower_spec, x_coords):
     plt.figure(figsize=(15, 10))
 
-    # 原图显示
     plt.subplot(311)
     result = cv2.cvtColor(image.copy(), cv2.COLOR_GRAY2RGB)
     curve = np.array(curve_points)
@@ -410,17 +405,15 @@ def visualize_spectrograms(image, binary_image, curve_points, upper_spec, lower_
     plt.title('Local Sampling Region')
     plt.axis('off')
 
-    # 上方波形图
     plt.subplot(312)
     plt.plot(x_coords[:-1], upper_spec, 'b-', linewidth=1)
-    # 添加水平参考线表示曲线位置
+
     plt.axhline(y=np.mean(upper_spec), color='r', linestyle='--', label='Curve Position')
     plt.title('Upper Region Intensity Profile')
     plt.grid(True)
     plt.ylabel('Intensity')
     plt.legend()
 
-    # 下方波形图
     plt.subplot(313)
     plt.plot(x_coords[:-1], lower_spec, 'r-', linewidth=1)
     plt.axhline(y=np.mean(lower_spec), color='r', linestyle='--', label='Curve Position')
